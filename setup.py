@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # project: sutils
 # description: Smart Utilities
-# file: sutils/setup.py
-# file_version: 1.0
-# original-author: Hynek Schlawack
-# original-source: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 # author: DANA <dana@deasys.net>
+# file: sutils/setup.py
+# file-version: 1.0
+# file-origin-author: Hynek Schlawack
+# file-origin-source: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 # license: GPL 3.0
 #
 # This program is free software: you can redistribute it and/or modify

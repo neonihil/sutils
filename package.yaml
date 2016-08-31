@@ -1,0 +1,15 @@
+#####################################################################
+## Package Descriptor
+#####################################################################
+## version: 1.0
+#####################################################################
+
+name: sutils
+description: Smart Utilities
+version: 0.5.0
+type: py-lib
+url: https://github.com/neonihil/sutils
+scm-url: git@github.com:neonihil/sutils.git
+author: DANA
+author-email: neonihil@neonihil.net
+

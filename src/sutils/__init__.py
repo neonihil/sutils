@@ -2,7 +2,7 @@
 # project: ulws
 # description: Ultra Light Web Server
 # file: ulws/__init__.py
-# file_version: 1.0
+# file-version: 1.0
 # author: DANA <dana@deasys.net>
 # license: GPL 3.0
 #
@@ -26,5 +26,7 @@ __license__ = "GPLv3+"
 __uri__ = "http://neonihil.github.io/sutils"
 __version__ = "3.1.0"
 
-from sutils import *
-
+from .primitives import *
+from .logging_utils import *
+from .string_utils import *
+import _json as json
