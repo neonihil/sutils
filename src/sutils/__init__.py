@@ -29,4 +29,5 @@ __version__ = "3.1.0"
 from .primitives import *
 from .logging_utils import *
 from .string_utils import *
+from .meta_patterns import *
 import _json as json
