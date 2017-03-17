@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # project: sutils
 # description: Smart Utilities
-# file: sutils/sutils.py
+# file: sutils/primitives.py
 # file-version: 3.1
 # author: DANA <dkovacs@deasys.eu>
 # license: GPL 3.0
@@ -20,7 +20,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import weakref
-import re
 import types
 
 
@@ -85,7 +84,7 @@ class qdict(dict):
 
     def copy( self, add = None ):
         res = qdict()
-        res.update( self )
+        res.update( self, False )
         if add:
             res.update( add )
         return res
@@ -95,26 +94,35 @@ class qdict(dict):
         res.update( other )
         return res
 
-    def update( self, source, recursive = False, add_keys = True ):
-        if not isinstance(source, dict): return
+    def update( self, source, recursive = False, add_keys = True, convert_to_qdict = False ):
+        # print "\n\n---------->> qdict.update()"
+        # print ">> self: ", self
+        # print "\n>> source: ", source
+        # print "\n>> recursive: ", recursive
+        # print ">> add_keys: ", add_keys
+        # print ">> convert_to_qdict: ", convert_to_qdict
+        if not isinstance(source, dict): return self
         if not recursive:
             if add_keys:
-                return super(qdict,self).update(source)
+                super(qdict,self).update(source)
+                return self
             for k in self:
                 self[k] = source.get(k,self[k])
-            return
+            return self
         if add_keys:
             for k, nv in source.iteritems():
+                if convert_to_qdict and isinstance(nv, dict):
+                    nv = qdict(nv)
                 if k in self:
                     cv = self[k]
                     if isinstance(cv, qdict):
-                        cv.update(nv, recursive = recursive, add_keys = add_keys)
+                        cv.update(nv, recursive = recursive, add_keys = add_keys, convert_to_qdict = convert_to_qdict)
                         continue
-                    elif isinstance(cv, dict):
+                    elif isinstance(cv, dict) and isinstance(nv, dict):
                         cv.update(nv)
                         continue
                 self[k] = nv
-            return
+            return self
         for k, cv in self.iteritems():
             try:
                 nv = source[k]
@@ -126,6 +134,7 @@ class qdict(dict):
                 cv.update(nv)
             else:
                 self[k] = nv
+        return self
 
 
 # ---------------------------------------------------
@@ -225,4 +234,49 @@ def cachedproperty( *args, **kwargs ):
         func, args = args[0], args[1:]
         return _cachedproperty( func )
     return _cachedproperty
+
+
+# ---------------------------------------------------
+# PrettyObject
+# ---------------------------------------------------    
+
+@__all__.register
+class PrettyObject(object):
+
+    # class NA(object):
+    #     def __repr__(self):
+    #         return "??"
+    _na = type("NA", (), {"__repr__": lambda s: '??'})()
+
+    def __str__(self):
+        return repr(self)
+
+    @classmethod
+    def get_pretty_fields(cls):
+        if not getattr(cls, '__pretty_field_format__', None):
+            fields = getattr(cls, '__pretty_fields__', None )
+            if not fields:
+                fields = getattr(cls, '__slots__', None )            
+            if not fields:
+                cls.__pretty_field_format__ = False
+            cls.__pretty_field_format__ = ', '.join([ "{0}={{{0}}}".format(n) for n in fields ])
+        return cls.__pretty_field_format__
+
+
+    def __repr__(self):
+        result = super(PrettyObject,self).__repr__()
+        fields = getattr(self.__class__, '__pretty_fields__', None )
+        if fields is None:
+            fields = getattr(self.__class__, '__slots__', None )
+        if fields:
+            context = {}
+            for name in fields:
+                try:
+                    value = repr(getattr(self,name,self._na))
+                except Exception as exc:
+                    value = exc
+                context[name] = value
+            result = result[:-1] + ' '
+            result += self.get_pretty_fields().format(**context) + '>'
+        return result
 
