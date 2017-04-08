@@ -95,7 +95,6 @@ class qdict(dict):
         return res
 
     def update( self, source, recursive = False, add_keys = True, convert_to_qdict = False ):
-        # print "\n\n---------->> qdict.update()"
         # print ">> self: ", self
         # print "\n>> source: ", source
         # print "\n>> recursive: ", recursive
@@ -111,21 +110,37 @@ class qdict(dict):
             return self
         if add_keys:
             for k, nv in source.iteritems():
-                if convert_to_qdict and isinstance(nv, dict):
-                    nv = qdict(nv)
-                if k in self:
+                if convert_to_qdict and isinstance(nv, dict) and (not isinstance(nv, qdict)):
+                    nv_ = qdict()
+                    nv_.update(nv, recursive = recursive, add_keys = add_keys, convert_to_qdict = convert_to_qdict)
+                    nv = nv_
+                if isinstance(nv, dict) and (k in self):
                     cv = self[k]
+                    if isinstance(cv, dict) and convert_to_qdict:
+                        cv = qdict(cv)
+                        self[k] = cv
                     if isinstance(cv, qdict):
                         cv.update(nv, recursive = recursive, add_keys = add_keys, convert_to_qdict = convert_to_qdict)
                         continue
-                    elif isinstance(cv, dict) and isinstance(nv, dict):
+                    if isinstance(cv, dict):
                         cv.update(nv)
                         continue
+                if convert_to_qdict and isinstance(nv, list):
+                    for i in range(len(nv)):
+                        if isinstance(nv[i], qdict): continue
+                        if isinstance(nv[i], dict):
+                            nnv = qdict()
+                            nnv.update(nv[i], True, add_keys, convert_to_qdict)
+                            nv[i] = nnv
                 self[k] = nv
             return self
         for k, cv in self.iteritems():
             try:
                 nv = source[k]
+                if convert_to_qdict and isinstance(nv, dict) and (not isinstance(nv, qdict)):
+                    nv_ = qdict()
+                    nv_.update(nv, recursive = recursive, add_keys = add_keys, convert_to_qdict = convert_to_qdict)
+                    nv = nv_
             except KeyError:
                 continue
             if isinstance(cv, qdict):
@@ -134,6 +149,13 @@ class qdict(dict):
                 cv.update(nv)
             else:
                 self[k] = nv
+        return self
+
+
+    def update__( self, *a, **kw):
+        # print "\n\n---------->> qdict.update", "0000", id(self)
+        self.update2(*a, **kw)
+        # print "---------->> qdict.update", "1111", id(self), "\n\n", self, "\n", "-" * 100, "\n\n"
         return self
 
 
@@ -147,6 +169,12 @@ class ObjectDict(qdict):
     def register(self, obj):
         self[obj.__name__] = obj
         return obj
+
+    def register_module(self, module):
+        for name in dir(module):
+            value = getattr(module, name)
+            if isinstance(value, type):
+                self.register(value)
 
 
 # -------------------------------------------------------------------------------
@@ -168,6 +196,9 @@ try:
         @classmethod
         def values(cls):
             return [ str(i.value) for i in cls]
+
+        # def __cmp__(self, other):
+        #     return str(self) < str(other)
 
 except ImportError:
     @__all__.register
@@ -214,25 +245,28 @@ def weakproperty( obj ):
 # ---------------------------------------------------    
 
 @__all__.register
-def cachedproperty( *args, **kwargs ):
+def cachedproperty(getter_ = None, setter = None, deleter = None, varname = None):
     """Creates a cached property (only set one)
     """
-    def _cachedproperty( func ):
-        varname = '_' + func.func_name
-        def getter(self):
+    varname_ = varname
+    def _cachedproperty(getter):
+        varname = varname_ or ('_' + getter.func_name)
+        def _getter(self):
             value = getattr( self, varname, None)
             if value is None:
-                value = func(self, *args, **kwargs )
+                value = getter(self)
                 setattr( self, varname, value )
             return value
-        def setter(self, value):
+        def _setter(self, value):
             setattr(self, varname, value)
-        def deleter(self):
+        def _deleter(self):
             setattr(self, varname, None)
-        return property( getter, setter, deleter )
-    if (len(args) >= 1) and isinstance( args[0], types.FunctionType ):
-        func, args = args[0], args[1:]
-        return _cachedproperty( func )
+        return property( _getter, setter or _setter, deleter or _deleter )
+    # if (len(args) >= 1) and isinstance( args[0], types.FunctionType ):
+    #     func, args = args[0], args[1:]
+    #     return _cachedproperty( func )
+    if getter_:
+        return _cachedproperty(getter_)
     return _cachedproperty
 
 

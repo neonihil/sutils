@@ -47,7 +47,7 @@ class PackageInfo(qdict):
         info = yaml.load(open(path, 'r').read())
         tier = info.get('tier', 'dev')
         tier_info = info.pop("tiers", None)
-        self.update(info, recursive = True, add_keys = True, convert_to_qdict = True)        
+        self.update(info, recursive = True, add_keys = True, convert_to_qdict = True)
         if tier_info and tier_info.get(tier,None):
             self.update(tier_info[tier], recursive = True, add_keys = True, convert_to_qdict = True)
 
