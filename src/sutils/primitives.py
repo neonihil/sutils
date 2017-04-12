@@ -51,6 +51,34 @@ class qlist(list):
 __all__ = qlist()
 __all__.register(qlist)
 
+
+# -------------------------------------------------------------------------------
+# NA
+# -------------------------------------------------------------------------------
+
+@__all__.register
+class NA(object):
+    """This class represents the 'Not Available' value. 
+
+    Can be usefull when a need to return that there is no value for the function,
+    but None is also considered as a meaningfull value.
+
+    """
+    class __metaclass__(type):
+        __repr__ = lambda s: "NA"
+        __str__ = lambda s: "??"
+        
+    __repr__ = lambda s: "NA"
+    __str__ = lambda s: "??"
+
+    def __eq__(self, other):
+        if isinstance(other,NA):
+            return True
+        if isinstance(other, type) and issubclass(other,NA):
+            return True
+        return False
+
+
 # ---------------------------------------------------
 # qdict
 # ---------------------------------------------------
@@ -80,7 +108,9 @@ class qdict(dict):
         return self[key]
 
     def __setattr__(self, key, value):
-        self[key] = value        
+        if key.startswith('_'):
+            return super(qdict, self).__setattr__(key, value)
+        self[key] = value
 
     def copy( self, add = None ):
         res = qdict()
@@ -270,17 +300,13 @@ def cachedproperty(getter_ = None, setter = None, deleter = None, varname = None
     return _cachedproperty
 
 
+
 # ---------------------------------------------------
 # PrettyObject
 # ---------------------------------------------------    
 
 @__all__.register
 class PrettyObject(object):
-
-    # class NA(object):
-    #     def __repr__(self):
-    #         return "??"
-    _na = type("NA", (), {"__repr__": lambda s: '??'})()
 
     def __str__(self):
         return repr(self)
@@ -306,7 +332,7 @@ class PrettyObject(object):
             context = {}
             for name in fields:
                 try:
-                    value = repr(getattr(self,name,self._na))
+                    value = repr(getattr(self,name,NA))
                 except Exception as exc:
                     value = exc
                 context[name] = value
