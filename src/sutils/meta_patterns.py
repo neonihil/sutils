@@ -49,8 +49,12 @@ class MetaMergedDefaultOptions(type):
         # print "\MetaMergedDefaultOptions.__new__", name, bases, fields
         __default_options__ = qdict()
         for base in reversed(bases):
+            # print "\MetaMergedDefaultOptions.__new__", "1111", base, __default_options__
             __default_options__.update(getattr(base, '__default_options__', {}), True, True, True)
-        __default_options__.update(fields.get('__default_options__', {}))
+            # print "\MetaMergedDefaultOptions.__new__", "2222", base, __default_options__
+        # print "\MetaMergedDefaultOptions.__new__", "3333", __default_options__
+        __default_options__.update(fields.get('__default_options__', {}), True, True, True)
+        # print "\MetaMergedDefaultOptions.__new__", "4444", __default_options__
         fields['__default_options__'] = __default_options__
         return super(MetaMergedDefaultOptions,mcs).__new__(mcs, name, bases, fields)
 
@@ -69,21 +73,23 @@ class MergedDefaultOptions(object):
     __metaclass__ = MetaMergedDefaultOptions
 
     def __init__(self, *args, **kwargs):
-        # print "\n", "MergedDefaultOptions.__init__", "111111", "kwargs", kwargs
+        # print "\n", "MergedDefaultOptions.__init__", "1111", "kwargs", kwargs
         options = qdict()
         options.update(self.__default_options__, True, convert_to_qdict = True)
-        # print "\n", "MergedDefaultOptions.__init__", "222222", "after update default", options
+        # print "\n", "MergedDefaultOptions.__init__", "2222", "after update default", options
         options.update(kwargs, True, convert_to_qdict = True)
-        # print "\n", "MergedDefaultOptions.__init__", "333333", "after update kwargs", options
+        # print "\n", "MergedDefaultOptions.__init__", "3333", "after update kwargs", options
         for name in self.__default_options__:
             setattr(self, name, options[name])
         if self.__default_options_check_unused__:
-            unused_keys = list(set(kwargs.keys()) - set(options))
+            unused_keys = list(set(kwargs.keys()) - set(self.__default_options__.keys()))
             if len(unused_keys) > 0:
                 raise TypeError("invalid keyword arguments: " + str(unused_keys))
         if self.__default_options_pop_used:
             for name in self.__default_options__:
                 if name in kwargs: del kwargs[name]
+        # print "\n", "MergedDefaultOptions.__init__", "4444", "after popping", kwargs
+        # print "anyadbuzi!!!!", args, kwargs, self.__default_options_check_unused__, unused_keys
         super(MergedDefaultOptions,self).__init__(*args, **kwargs)
 
 
