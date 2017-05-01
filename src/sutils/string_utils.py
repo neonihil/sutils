@@ -29,10 +29,12 @@ __all__ = qlist()
 # ---------------------------------------------------
 # origin: https://github.com/jpvanhal/inflection/blob/master/inflection.py
 
+_re_camelize = re.compile(r"(?:^|_)(.)")
+
 @__all__.register
-def camelize(string, uppercase_first_letter=True):
+def camelize(value, uppercase_first_letter=True):
     """
-    Convert strings to CamelCase.
+    Convert values to CamelCase.
     Examples::
         >>> camelize("device_type")
         "DeviceType"
@@ -47,9 +49,9 @@ def camelize(string, uppercase_first_letter=True):
         lowerCamelCase. Defaults to `True`.
     """
     if uppercase_first_letter:
-        return re.sub(r"(?:^|_)(.)", lambda m: m.group(1).upper(), string)
+        return _re_camelize.sub(lambda m: m.group(1).upper(), value)
     else:
-        return string[0].lower() + camelize(string)[1:]
+        return value[0].lower() + camelize(value)[1:]
 
 
 # ---------------------------------------------------
@@ -57,8 +59,11 @@ def camelize(string, uppercase_first_letter=True):
 # ---------------------------------------------------
 # origin: https://github.com/jpvanhal/inflection/blob/master/inflection.py
 
+_re_undercorize_1 = re.compile(r"([A-Z]+)([A-Z][a-z])")
+_re_undercorize_2 = re.compile(r"([a-z\d])([A-Z])")
+
 @__all__.register
-def underscorize(word):
+def underscorize(value):
     """
     Make an underscored, lowercase form from the expression in the string.
     Example::
@@ -69,10 +74,35 @@ def underscorize(word):
         >>> camelize(underscore("IOError"))
         "IoError"
     """
-    word = re.sub(r"([A-Z]+)([A-Z][a-z])", r'\1_\2', word)
-    word = re.sub(r"([a-z\d])([A-Z])", r'\1_\2', word)
-    word = word.replace("-", "_")
-    return word.lower()
+    value = _re_undercorize_1.sub(r'\1_\2', value)
+    value = _re_undercorize_2.sub(r'\1_\2', value)
+    value = value.replace("-", "_").lower()
+    # print "=========>>>> ", value
+    return value
+
+
+
+# ---------------------------------------------------
+# titleize()
+# ---------------------------------------------------
+
+_re_titleize = re.compile( r"((?<=[a-z])([A-Z])|([A-Z])(?=[a-z]))" )
+
+@__all__.register
+def titleize(value):
+    """
+    Convert strings to 'Title String'.
+    Examples::
+        >>> titleize("device_type")
+        "Device Type"
+        >>> titleize("deviceType")
+        "Device Type"
+    """
+    # value = camelize(value)
+    # return _re_titleize.sub("\1 \2", value)
+    value = value.replace('_', ' ')
+    value = value.title()
+    return value
 
 
 # --------------------------------------------
@@ -102,6 +132,6 @@ __format_filesize_precisions = (
 def format_filesize( size, precision = None ):
     for unit, prec in __format_filesize_precisions:
         if size < 1024.0:
-            return "{:3.{prec}f} {}".format( size, unit, prec = precision or prec )
+            return "{:3.{prec}f} {}".format( size, unit, prec = precision if precision is not None else prec )
         size /= 1024.0
     return "%3.1f%s" % (num, 'EB')

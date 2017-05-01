@@ -19,10 +19,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# ---------------------------------------------------
+# imports
+# ---------------------------------------------------
+
+from copy import copy, deepcopy
 
 from .primitives import qlist, qdict
 
+
+# ---------------------------------------------------
+# exports
+# ---------------------------------------------------
+
 __all__ = qlist()
+
 
 # ---------------------------------------------------
 # MetaSubclassRegister
@@ -46,15 +57,16 @@ class MetaSubclassRegister(type):
 class MetaMergedDefaultOptions(type):
 
     def __new__(mcs, name, bases, fields ):
-        # print "\MetaMergedDefaultOptions.__new__", name, bases, fields
+        # print "\n\nMetaMergedDefaultOptions.__new__", "0000", mcs, name, bases, fields
         __default_options__ = qdict()
         for base in reversed(bases):
-            # print "\MetaMergedDefaultOptions.__new__", "1111", base, __default_options__
+            # print "\nMetaMergedDefaultOptions.__new__", "1111  ----->", base, __default_options__
             __default_options__.update(getattr(base, '__default_options__', {}), True, True, True)
-            # print "\MetaMergedDefaultOptions.__new__", "2222", base, __default_options__
-        # print "\MetaMergedDefaultOptions.__new__", "3333", __default_options__
+            # print "\nMetaMergedDefaultOptions.__new__", "1111        ", base, __default_options__
+        # print "\nMetaMergedDefaultOptions.__new__", "2222", __default_options__
+        # print "\nMetaMergedDefaultOptions.__new__", "3333", fields.get('__default_options__', None)
         __default_options__.update(fields.get('__default_options__', {}), True, True, True)
-        # print "\MetaMergedDefaultOptions.__new__", "4444", __default_options__
+        # print "\nMetaMergedDefaultOptions.__new__", "4444", __default_options__
         fields['__default_options__'] = __default_options__
         return super(MetaMergedDefaultOptions,mcs).__new__(mcs, name, bases, fields)
 
@@ -68,15 +80,21 @@ class MergedDefaultOptions(object):
 
     __default_options__ = {}
     __default_options_check_unused__ = True
-    __default_options_pop_used = True
+    __default_options_pop_used__ = True
+    __default_options_from_class__ = False
 
     __metaclass__ = MetaMergedDefaultOptions
 
     def __init__(self, *args, **kwargs):
+        # print "\n\n", "MergedDefaultOptions.__init__", "0000", self.__class__, self
         # print "\n", "MergedDefaultOptions.__init__", "1111", "kwargs", kwargs
         options = qdict()
         options.update(self.__default_options__, True, convert_to_qdict = True)
-        # print "\n", "MergedDefaultOptions.__init__", "2222", "after update default", options
+        # print "\n", "MergedDefaultOptions.__init__", "2200", "after update defaults", options
+        if self.__default_options_from_class__:
+            # print "\n", "MergedDefaultOptions.__init__", "2211", "updating with __class__.__dict__: ", self.__class__.__dict__
+            options.update(dict(self.__class__.__dict__.items()), True, True, False)
+            # print "\n", "MergedDefaultOptions.__init__", "2222", "after update with __class__", options
         options.update(kwargs, True, convert_to_qdict = True)
         # print "\n", "MergedDefaultOptions.__init__", "3333", "after update kwargs", options
         for name in self.__default_options__:
@@ -85,7 +103,7 @@ class MergedDefaultOptions(object):
             unused_keys = list(set(kwargs.keys()) - set(self.__default_options__.keys()))
             if len(unused_keys) > 0:
                 raise TypeError("invalid keyword arguments: " + str(unused_keys))
-        if self.__default_options_pop_used:
+        if self.__default_options_pop_used__:
             for name in self.__default_options__:
                 if name in kwargs: del kwargs[name]
         # print "\n", "MergedDefaultOptions.__init__", "4444", "after popping", kwargs
