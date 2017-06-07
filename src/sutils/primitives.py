@@ -201,9 +201,15 @@ class qdict(dict):
 @__all__.register
 class ObjectDict(qdict):
 
-    def register(self, obj):
-        self[obj.__name__] = obj
-        return obj
+    def register(self, *args):
+        if len(args) == 1 and hasattr(args[0], '__name__'):
+            self[args[0].__name__] = args[0]
+            return args[0]
+        name = args[0]
+        def _register(obj):
+            self[name] = obj
+            return obj
+        return _register
 
     def register_module(self, module):
         for name in dir(module):
