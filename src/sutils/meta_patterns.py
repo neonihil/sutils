@@ -58,16 +58,28 @@ class MetaMergedDefaultOptions(type):
 
     def __new__(mcs, name, bases, fields ):
         # print "\n\nMetaMergedDefaultOptions.__new__", "0000", mcs, name, bases, fields
-        __default_options__ = qdict()
+        default_options = qdict()
+        default_options_from_class = False
         for base in reversed(bases):
-            # print "\nMetaMergedDefaultOptions.__new__", "1111  ----->", base, __default_options__
-            __default_options__.update(getattr(base, '__default_options__', {}), True, True, True)
-            # print "\nMetaMergedDefaultOptions.__new__", "1111        ", base, __default_options__
-        # print "\nMetaMergedDefaultOptions.__new__", "2222", __default_options__
+            # print "\nMetaMergedDefaultOptions.__new__", "1111  ----->", base, default_options
+            default_options.update(getattr(base, '__default_options__', {}), True, True, True)
+            default_options_from_class = default_options_from_class or getattr(base, '__default_options_from_class__', False)
+            # print "\nMetaMergedDefaultOptions.__new__", "1111        ", base, default_options
+        # print "\nMetaMergedDefaultOptions.__new__", "2222", default_options
         # print "\nMetaMergedDefaultOptions.__new__", "3333", fields.get('__default_options__', None)
-        __default_options__.update(fields.get('__default_options__', {}), True, True, True)
-        # print "\nMetaMergedDefaultOptions.__new__", "4444", __default_options__
-        fields['__default_options__'] = __default_options__
+        default_options.update(fields.get('__default_options__', {}), True, True, True)
+
+        if default_options_from_class:
+            # print "\nMetaMergedDefaultOptions.__new__", "4444", default_options
+            class_defaults = {}
+            for key_name in default_options.iterkeys():
+                if not key_name in fields: continue
+                value = fields[key_name]
+                if callable(value) or isinstance(value, property): continue
+                class_defaults[key_name] = fields.pop(key_name)
+            default_options.update(class_defaults, True, True, False)
+        # print "\nMetaMergedDefaultOptions.__new__", "5555", name, default_options
+        fields['__default_options__'] = default_options
         return super(MetaMergedDefaultOptions,mcs).__new__(mcs, name, bases, fields)
 
 
@@ -91,10 +103,10 @@ class MergedDefaultOptions(object):
         options = qdict()
         options.update(self.__default_options__, True, convert_to_qdict = True)
         # print "\n", "MergedDefaultOptions.__init__", "2200", "after update defaults", options
-        if self.__default_options_from_class__:
-            # print "\n", "MergedDefaultOptions.__init__", "2211", "updating with __class__.__dict__: ", self.__class__.__dict__
-            options.update(dict(self.__class__.__dict__.items()), True, True, False)
-            # print "\n", "MergedDefaultOptions.__init__", "2222", "after update with __class__", options
+        # if self.__default_options_from_class__:
+        #     # print "\n", "MergedDefaultOptions.__init__", "2211", "updating with __class__.__dict__: ", self.__class__.__dict__
+        #     options.update(dict(self.__class__.__dict__.items()), True, True, False)
+        #     # print "\n", "MergedDefaultOptions.__init__", "2222", "after update with __class__", options
         options.update(kwargs, True, convert_to_qdict = True)
         # print "\n", "MergedDefaultOptions.__init__", "3333", "after update kwargs", options
         for name in self.__default_options__:
