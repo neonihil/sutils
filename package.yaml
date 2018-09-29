@@ -6,7 +6,7 @@
 
 name: sutils
 description: Smart Utilities
-version: 0.5.0
+version: 0.5.1
 type: py-lib
 url: https://github.com/neonihil/sutils
 scm-url: git@github.com:neonihil/sutils.git
