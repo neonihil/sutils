@@ -24,7 +24,7 @@ __email__ = "dana@deasys.net"
 __description__ = "Smart Utilities"
 __license__ = "GPLv3+"
 __uri__ = "http://neonihil.github.io/sutils"
-__version__ = "3.1.0"
+__version__ = "3.2.0"
 
 from .primitives import *
 from .logging_utils import *
