@@ -286,8 +286,8 @@ release::release-minor
 # release
 # -----------------------------------------------------------------------------
 
-publish:: build
-	twine upload
+publish:: dist
+	twine upload dist/*
 
 
 
