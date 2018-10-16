@@ -287,7 +287,7 @@ release::release-minor
 # -----------------------------------------------------------------------------
 
 publish:: dist
-	twine upload dist/*
+	source activate && twine upload dist/*
 
 
 
