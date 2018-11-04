@@ -29,7 +29,7 @@ __all__ = qlist()
 # ---------------------------------------------------
 # origin: https://github.com/jpvanhal/inflection/blob/master/inflection.py
 
-_re_camelize = re.compile(r"(?:^|_)(.)")
+_re_camelize = re.compile(r"(?:^|[_-])(.)")
 
 @__all__.register
 def camelize(value, uppercase_first_letter=True):
