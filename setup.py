@@ -1,104 +1,105 @@
 #!/usr/bin/env python
-# project: sutils
-# description: Smart Utilities
-# author: DANA <dana@deasys.net>
+# package: sutils
+# licence: MIT <https://opensource.org/licenses/MIT>
+# author: Daniel Kovacs <mondomhogynincsen@gmail.com>
 # file: sutils/setup.py
-# file-version: 1.0
-# file-origin-author: Hynek Schlawack
-# file-origin-source: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
-# license: GPL 3.0
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# file-version: 2.2.1
+
+
+# ---------------------------------------------------------------------------------------
+# configuration
+# ---------------------------------------------------------------------------------------
+
+NAME = "sutils"
+VERSION = "0.4.0"
+DESCRIPTION = """Smart utilities for smart python programmers"""
+AUTHOR = "Daniel Kovacs"
+AUTHOR_EMAIL = "mondomhogynincsen@gmail.com"
+MAINTAINER = "Daniel Kovacs"
+MAINTAINER_EMAIL = "mondomhogynincsen@gmail.com"
+SCM_URL= "https://github.com/ultralightweight/sutils"
+KEYWORDS = []
+CLASSIFIERS = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.6",
+]
+
+# ---------------------------------------------------------------------------------------
+# imports
+# ---------------------------------------------------------------------------------------
 
 import codecs
 import os
 import re
 
 from setuptools import setup, find_packages
+try: # for pip >= 10
+    from pip._internal.req import parse_requirements
+except ImportError: # for pip <= 9.0.3
+    from pip.req import parse_requirements
 
 
-###################################################################
+# ---------------------------------------------------------------------------------------
+# _read()
+# ---------------------------------------------------------------------------------------
 
-NAME = "sutils"
-PACKAGES = find_packages(where="src")
-META_PATH = os.path.join("src", "sutils", "__init__.py")
-KEYWORDS = ["utilities", "smart", "neonihil"]
-CLASSIFIERS = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.3",
-    "Programming Language :: Python :: 3.4",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-]
-INSTALL_REQUIRES = [
-]
-
-###################################################################
-
-HERE = os.path.abspath(os.path.dirname(__file__))
-
-
-def read(*parts):
-    """
-    Build an absolute path from *parts* and and return the contents of the
-    resulting file.  Assume UTF-8 encoding.
-    """
-    with codecs.open(os.path.join(HERE, *parts), "rb", "utf-8") as f:
+def _read(*parts):
+    with codecs.open(os.path.join(HOME, *parts), "rb", "utf-8") as f:
         return f.read()
 
-META_FILE = read(META_PATH)
 
-def find_meta(meta):
-    """
-    Extract __*meta*__ from META_FILE.
-    """
-    meta_match = re.search(
-        r"^__{meta}__ = ['\"]([^'\"]*)['\"]".format(meta=meta),
-        META_FILE, re.M
-    )
-    if meta_match:
-        return meta_match.group(1)
-    raise RuntimeError("Unable to find __{meta}__ string.".format(meta=meta))
+# ---------------------------------------------------------------------------------------
+# get_requirements
+# ---------------------------------------------------------------------------------------
 
+def get_requirements():
+    packages, dependencies = [], []
+    for ir in parse_requirements(os.path.join( HOME, 'requirements.txt' ), session=False):
+        if ir.link:
+            dependencies.append(ir.link.url)
+            continue
+        packages.append(str(ir.req))
+    return packages, dependencies
+
+
+# ---------------------------------------------------------------------------------------
+# internal variables
+# ---------------------------------------------------------------------------------------
+
+HOME = os.path.abspath(os.path.dirname(__file__))
+PACKAGES = find_packages(where='src')
+INSTALL_REQUIRES, DEPENDENCY_LINKS = get_requirements()
+
+
+# ---------------------------------------------------------------------------------------
+# setup()
+# ---------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     setup(
         name=NAME,
-        description=find_meta("description"),
-        license=find_meta("license"),
-        url=find_meta("uri"),
-        version=find_meta("version"),
-        author=find_meta("author"),
-        author_email=find_meta("email"),
-        maintainer=find_meta("author"),
-        maintainer_email=find_meta("email"),
+        description=DESCRIPTION,
+        license="License :: MIT",
+        url=SCM_URL,
+        version=VERSION,
+        author=AUTHOR,
+        author_email=AUTHOR_EMAIL,
+        maintainer=MAINTAINER,
+        maintainer_email=MAINTAINER_EMAIL,
         keywords=KEYWORDS,
-        long_description=read("README.rst"),
+        long_description=_read("README.md"),
         packages=PACKAGES,
         package_dir={"": "src"},
         zip_safe=False,
         classifiers=CLASSIFIERS,
         install_requires=INSTALL_REQUIRES,
+        dependency_links=DEPENDENCY_LINKS,
+        setup_requires=[
+        ],
+        tests_require=[
+            'pytest',
+        ],
     )
-
-

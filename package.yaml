@@ -5,11 +5,11 @@
 #####################################################################
 
 name: sutils
-description: Smart Utilities
-version: 0.5.0
+description: Smart utilities for smart python programmers
+version: 0.4.0
 type: py-lib
-url: https://github.com/neonihil/sutils
-scm-url: git@github.com:neonihil/sutils.git
+url: https://github.com/ultralightweight/sutils
+scm-url: git@github.com:ultralightweight/sutils.git
 author: DANA
-author-email: neonihil@neonihil.net
+author-email: mondomhogynincsen@gmail.com
 
