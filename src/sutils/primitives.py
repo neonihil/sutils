@@ -67,17 +67,17 @@ __all__.register(qlist)
 # NA
 # -------------------------------------------------------------------------------
 
-@__all__.register
-class NA(object):
+class NAMeta(type):
+    __repr__ = lambda s: "NA"
+    __str__ = lambda s: "??"
+
+class _NA(object):
     """This class represents the 'Not Available' value. 
 
     Can be usefull when a need to return that there is no value for the function,
     but None is also considered as a meaningfull value.
 
     """
-    class __metaclass__(type):
-        __repr__ = lambda s: "NA"
-        __str__ = lambda s: "??"
         
     __repr__ = lambda s: "NA"
     __str__ = lambda s: "??"
@@ -88,6 +88,10 @@ class NA(object):
         if isinstance(other, type) and issubclass(other,NA):
             return True
         return False
+
+NA = NAMeta("NA", (_NA,), {})
+
+__all__.append("NA")
 
 
 # ---------------------------------------------------
