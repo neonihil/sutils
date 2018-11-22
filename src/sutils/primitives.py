@@ -24,9 +24,15 @@
 # imports
 # ---------------------------------------------------
 
+import sys
 import weakref
 import types
 
+
+# ---------------------------------------------------
+# PYTHON3
+# ---------------------------------------------------
+_PYTHON3 = True if sys.version_info[0] >= 3 else False
 
 # ---------------------------------------------------
 # qlist
@@ -291,7 +297,7 @@ def cachedproperty(getter_ = None, setter = None, deleter = None, varname = None
     """
     varname_ = varname
     def _cachedproperty(getter):
-        varname = varname_ or ('_' + getter.func_name)
+        varname = varname_ or ('_' + getattr(getter, "__name__" if _PYTHON3 else "func_name"))
         def _getter(self):
             value = getattr( self, varname, None)
             if value is None:
