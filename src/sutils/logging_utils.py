@@ -23,6 +23,7 @@
 # imports
 # -----------------------------------------------------------------------------
 
+import logging
 from .primitives import qlist, qdict
 
 
