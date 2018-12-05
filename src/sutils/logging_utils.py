@@ -37,13 +37,13 @@ __all__ = qlist()
 # LOG_FORMATS
 # -----------------------------------------------------------------------------
 
+__all__.append("LOG_FORMATS")
 LOG_FORMATS = qdict(
     short = "%(asctime)s\t%(levelname)s\t%(name)s:\t%(message)s",
     thread = "%(asctime)s\t%(levelname)s\t[tid:%(thread)x (%(threadName)s)]\t%(name)s:\t%(message)s",
     process = "%(asctime)s\t%(levelname)s\t[pid:%(process)d]\t%(name)s:\t%(message)s",
     full = "%(asctime)s\t%(levelname)s\t[pid:%(process)d tid:%(thread)x (%(threadName)s)]\t%(name)s:\t%(message)s",
 )
-
 
 
 # -----------------------------------------------------------------------------
