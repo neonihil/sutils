@@ -11,7 +11,7 @@
 # ---------------------------------------------------------------------------------------
 
 NAME = "sutils"
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 DESCRIPTION = """Smart utilities for smart python programmers"""
 AUTHOR = "Daniel Kovacs"
 AUTHOR_EMAIL = "mondomhogynincsen@gmail.com"
