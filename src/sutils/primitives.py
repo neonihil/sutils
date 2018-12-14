@@ -156,7 +156,7 @@ class qdict(dict):
                 self[k] = source.get(k,self[k])
             return self
         if add_keys:
-            for k, nv in source.iteritems():
+            for k, nv in source.items():
                 if convert_to_qdict and isinstance(nv, dict) and (not isinstance(nv, qdict)):
                     nv_ = qdict()
                     nv_.update(nv, recursive = recursive, add_keys = add_keys, convert_to_qdict = convert_to_qdict)
@@ -181,7 +181,7 @@ class qdict(dict):
                             nv[i] = nnv
                 self[k] = nv
             return self
-        for k, cv in self.iteritems():
+        for k, cv in self.items():
             try:
                 nv = source[k]
                 if convert_to_qdict and isinstance(nv, dict) and (not isinstance(nv, qdict)):
