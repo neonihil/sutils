@@ -331,35 +331,43 @@ def cachedproperty(getter_ = None, setter = None, deleter = None, varname = None
 @__all__.register
 class PrettyObject(object):
 
+    __PRETTY_FORMATS__ = qdict(
+        full = "<{cls.__module__}.{cls.__name__} object at 0x{{__self_id__:02x}} {fields}>",
+        brief = "<{cls.__name__} object at 0x{{__self_id__:02x}} {fields}>",
+        short = "<{cls.__name__} 0x{{__self_id__:02x}} {fields}>",
+    )
+
+    __pretty_format__ = __PRETTY_FORMATS__.full
+
     def __str__(self):
         return repr(self)
 
     @classmethod
-    def get_pretty_fields(cls):
-        if not getattr(cls, '__pretty_field_format__', None):
+    def _get_pretty_format(cls):
+        if getattr(cls, '__pretty_field_format__', None) is None:
             fields = getattr(cls, '__pretty_fields__', None )
             if not fields:
-                fields = getattr(cls, '__slots__', None )            
+                fields = getattr(cls, '__slots__', None )
             if not fields:
                 cls.__pretty_field_format__ = False
-            cls.__pretty_field_format__ = ', '.join([ "{0}={{{0}}}".format(n) for n in fields ])
+            fields = ', '.join([ "{0}={{{0}}}".format(n) for n in fields ])
+            cls.__pretty_field_format__ = cls.__pretty_format__.format(cls=cls, fields=fields)
         return cls.__pretty_field_format__
 
 
     def __repr__(self):
-        result = super(PrettyObject,self).__repr__()
         fields = getattr(self.__class__, '__pretty_fields__', None )
         if fields is None:
             fields = getattr(self.__class__, '__slots__', None )
         if fields:
-            context = {}
+            context = { "__self_id__": id(self), "__self__": self }
             for name in fields:
                 try:
                     value = repr(getattr(self,name,NA))
                 except Exception as exc:
                     value = exc
                 context[name] = value
-            result = result[:-1] + ' '
-            result += self.get_pretty_fields().format(**context) + '>'
-        return result
+            return self._get_pretty_format().format(**context)
+        return super(PrettyObject,self).__repr__()
+
 
