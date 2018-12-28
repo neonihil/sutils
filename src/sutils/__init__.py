@@ -24,7 +24,7 @@ __email__ = "dana@deasys.net"
 __description__ = "Smart Utilities"
 __license__ = "GPLv3+"
 __uri__ = "https://github.com/ultralightweight/sutils"
-__version__ = "0.4.4"
+__version__ = "0.5.0"
 
 from .primitives import *
 from .logging_utils import *
