@@ -125,7 +125,7 @@ class qdict(dict):
         return self[key]
 
     def __setattr__(self, key, value):
-        if key.startswith('_'):
+        if key.startswith('_') or key in self.__dict__ or key in self.__class__.__dict__:
             return super(qdict, self).__setattr__(key, value)
         self[key] = value
 
