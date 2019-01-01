@@ -338,36 +338,66 @@ class PrettyObject(object):
     )
 
     __pretty_format__ = __PRETTY_FORMATS__.full
+    __pretty_field_separator__ = ", "
 
     def __str__(self):
         return repr(self)
 
+    @classmethod 
+    def __parse_pretty_field_def(cls, field_def):
+        if '!' in field_def:
+            field_def = field_def.split('!', 1)
+            field_def[1] = '!' + field_def[1]
+            return field_def
+        if ':' in field_def:
+            field_def = field_def.split(':', 1)
+            field_def[1] = ':' + field_def[1]
+            return field_def
+        return field_def, ""
+
     @classmethod
-    def _get_pretty_format(cls):
-        if getattr(cls, '__pretty_field_format__', None) is None:
+    def __get_pretty_field_defs(cls):
+        if getattr(cls, '__pretty_field_defs__', None) is None:
             fields = getattr(cls, '__pretty_fields__', None )
             if not fields:
                 fields = getattr(cls, '__slots__', None )
             if not fields:
+                cls.__pretty_field_defs__ = False
+                return False
+            cls.__pretty_field_defs__ = list(map(cls.__parse_pretty_field_def, fields))
+        return cls.__pretty_field_defs__
+
+
+    @classmethod
+    def __get_pretty_format(cls):
+        if getattr(cls, '__pretty_field_format__', None) is None:
+            field_defs = cls.__get_pretty_field_defs()
+            if not field_defs:
                 cls.__pretty_field_format__ = False
-            fields = ', '.join([ "{0}={{{0}}}".format(n) for n in fields ])
+                return False
+            fields = cls.__pretty_field_separator__.join([ "{0}={{{0}{1}}}".format(*f) for f in field_defs ])
             cls.__pretty_field_format__ = cls.__pretty_format__.format(cls=cls, fields=fields)
         return cls.__pretty_field_format__
 
 
     def __repr__(self):
-        fields = getattr(self.__class__, '__pretty_fields__', None )
-        if fields is None:
-            fields = getattr(self.__class__, '__slots__', None )
-        if fields:
-            context = { "__self_id__": id(self), "__self__": self }
-            for name in fields:
-                try:
-                    value = repr(getattr(self,name,NA))
-                except Exception as exc:
-                    value = exc
-                context[name] = value
-            return self._get_pretty_format().format(**context)
-        return super(PrettyObject,self).__repr__()
+        field_defs = self.__get_pretty_field_defs()
+        if not field_defs:
+            return super(PrettyObject,self).__repr__()
+        context = { "__self_id__": id(self), "__self__": self }
+        for name, fmt in field_defs:
+            try:
+                value = getattr(self,name,NA)
+            except Exception as exc:
+                value = exc
+            context[name] = value
+        try:
+            return self.__get_pretty_format().format(**context)
+        except Exception as exc:
+            raise
+            # import pdb; pdb.set_trace()
+            # del context["__self__"]
+            # return str(exc) + "   ctx: " + repr(context)
+
 
 
