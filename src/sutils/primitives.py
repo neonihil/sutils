@@ -335,6 +335,7 @@ class PrettyObject(object):
         full = "<{cls.__module__}.{cls.__name__} object at 0x{{__self_id__:02x}} {fields}>",
         brief = "<{cls.__name__} object at 0x{{__self_id__:02x}} {fields}>",
         short = "<{cls.__name__} 0x{{__self_id__:02x}} {fields}>",
+        minimal = "<{cls.__name__} {fields}>",
     )
 
     __pretty_format__ = __PRETTY_FORMATS__.full
@@ -353,7 +354,7 @@ class PrettyObject(object):
             field_def = field_def.split(':', 1)
             field_def[1] = ':' + field_def[1]
             return field_def
-        return field_def, ""
+        return field_def, "!r"
 
     @classmethod
     def __get_pretty_field_defs(cls):
