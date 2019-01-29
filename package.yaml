@@ -6,7 +6,7 @@
 
 name: sutils
 description: Smart utilities for smart python programmers
-version: 0.6.0
+version: 0.7.0
 type: py-lib
 url: https://github.com/ultralightweight/sutils
 scm-url: git@github.com:ultralightweight/sutils.git
