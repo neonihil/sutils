@@ -146,3 +146,16 @@ def format_filesize( size, precision = None ):
         size /= 1024.0
     return "%3.1f%s" % (num, 'EB')
 
+
+
+# -----------------------------------------------------------------------------
+# find_common_prefix()
+# -----------------------------------------------------------------------------
+
+@__all__.register
+def find_common_prefix(a, b):
+    for counter, letter_a, letter_b in zip(range(max(len(a),len(b))), a, b):
+        if not letter_a == letter_b:
+            return a[:counter]
+
+
