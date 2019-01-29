@@ -2,7 +2,7 @@
 # description: General Python Makefile
 # author: Daniel Kovacs <mondomhogynincsen@gmail.com>
 # licence: MIT <https://opensource.org/licenses/MIT>
-# version: 3.2
+# version: 3.3
 # supported: virtualenv, pytest
 # -----------------------------------------------------------------------------
 
@@ -251,7 +251,7 @@ setup:: deps deps-test deps-build
 # -----------------------------------------------------------------------------
 
 bump-%:: deps-build
-	source activate && bumpversion $(subst bump-,,$@)
+	source activate && bumpversion --list --commit --tag $(subst bump-,,$@)
 
 
 # -----------------------------------------------------------------------------
