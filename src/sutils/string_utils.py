@@ -157,5 +157,6 @@ def find_common_prefix(a, b):
     for counter, letter_a, letter_b in zip(range(max(len(a),len(b))), a, b):
         if not letter_a == letter_b:
             return a[:counter]
+    return a
 
 
